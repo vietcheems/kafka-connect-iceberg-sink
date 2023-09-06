@@ -41,6 +41,7 @@ class TestIcebergUtil {
     private static final String defaultPartitionTimestamp = "__source_ts_ms";
     private static final String defaultPartitionColumn = "__source_ts";
 
+    final String serdeWithSchemaNestedStruct = Testing.Files.readResourceAsString("json/serde-with-schema-nested-struct.json");
     final String serdeWithSchema = Testing.Files.readResourceAsString("json/serde-with-schema.json");
     final String unwrapWithSchema = Testing.Files.readResourceAsString("json/unwrap-with-schema.json");
     final String unwrapWithGeomSchema = Testing.Files.readResourceAsString("json/serde-with-schema_geom.json");
@@ -53,11 +54,23 @@ class TestIcebergUtil {
     private final IcebergSinkConfiguration defaultConfiguration = new IcebergSinkConfiguration(new HashMap());
 
     @Test
+    public void testNestedStructJsonRecord() throws JsonProcessingException {
+        IcebergChangeEvent e = new IcebergChangeEvent("test",
+                MAPPER.readTree(serdeWithSchemaNestedStruct).get("payload"), null,
+                MAPPER.readTree(serdeWithSchemaNestedStruct).get("schema"), null, this.defaultConfiguration);
+        System.out.println("bruh");
+        Schema schema = e.icebergSchema(defaultPartitionColumn);
+        System.out.println(schema);
+        assertTrue(schema.toString().contains("before: optional struct<2: id: optional int (), " +
+                "3: first_name: optional string (), 4:"));
+    }
+    @Test
     public void testNestedJsonRecord() throws JsonProcessingException {
         IcebergChangeEvent e = new IcebergChangeEvent("test",
                 MAPPER.readTree(serdeWithSchema).get("payload"), null,
                 MAPPER.readTree(serdeWithSchema).get("schema"), null, this.defaultConfiguration);
         Schema schema = e.icebergSchema(defaultPartitionColumn);
+        System.out.println(schema);
         assertTrue(schema.toString().contains("before: optional struct<2: id: optional int (), " +
                 "3: first_name: optional string (), 4:"));
     }

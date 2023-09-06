@@ -262,10 +262,12 @@ public class IcebergChangeEvent {
   public class JsonSchema {
     private final JsonNode valueSchema;
     private final JsonNode keySchema;
+    private int currentColumnId;
 
     JsonSchema(JsonNode valueSchema, JsonNode keySchema) {
       this.valueSchema = valueSchema;
       this.keySchema = keySchema;
+      this.currentColumnId = 0;
     }
 
     public JsonNode valueSchema() {
@@ -293,7 +295,7 @@ public class IcebergChangeEvent {
     private List<Types.NestedField> KeySchemaFields() {
       if (keySchema != null && keySchema.has("fields") && keySchema.get("fields").isArray()) {
         LOGGER.debug(keySchema.toString());
-        return icebergSchema(keySchema, "", 0);
+        return icebergSchema(keySchema, "");
       }
       LOGGER.trace("Key schema not found!");
       return new ArrayList<>();
@@ -302,7 +304,7 @@ public class IcebergChangeEvent {
     private List<Types.NestedField> valueSchemaFields(String partitionColumn) {
       if (valueSchema != null && valueSchema.has("fields") && valueSchema.get("fields").isArray()) {
         LOGGER.debug(valueSchema.toString());
-        return icebergSchema(valueSchema, "", 0, true, partitionColumn);
+        return icebergSchema(valueSchema, "", true, partitionColumn);
       }
       LOGGER.trace("Event schema not found!");
       return new ArrayList<>();
@@ -347,17 +349,17 @@ public class IcebergChangeEvent {
       return new Schema(tableColumns, identifierFieldIds);
     }
 
-    private List<Types.NestedField> icebergSchema(JsonNode eventSchema, String schemaName, int columnId) {
-      return icebergSchema(eventSchema, schemaName, columnId, false, "");
+    private List<Types.NestedField> icebergSchema(JsonNode eventSchema, String schemaName) {
+      return icebergSchema(eventSchema, schemaName, false, "");
     }
 
-    private List<Types.NestedField> icebergSchema(JsonNode eventSchema, String schemaName, int columnId,
+    private List<Types.NestedField> icebergSchema(JsonNode eventSchema, String schemaName,
                                                   boolean addPartitionField, String partitionColumn) {
       List<Types.NestedField> schemaColumns = new ArrayList<>();
       String schemaType = eventSchema.get("type").textValue();
       LOGGER.debug("Converting Schema of: {}::{}", schemaName, schemaType);
       for (JsonNode jsonSchemaFieldNode : eventSchema.get("fields")) {
-        columnId++;
+//        this.currentColumnId++;
         String fieldName = jsonSchemaFieldNode.get("field").textValue();
         String fieldType = jsonSchemaFieldNode.get("type").textValue();
         String fieldTypeName = "";
@@ -367,7 +369,7 @@ public class IcebergChangeEvent {
         }
 
         LOGGER.debug("Processing Field: [{}] {}.{}::{} ({})",
-                     columnId, schemaName, fieldName, fieldType, fieldTypeName);
+                     this.currentColumnId, schemaName, fieldName, fieldType, fieldTypeName);
         switch (fieldType) {
           case "array":
             JsonNode items = jsonSchemaFieldNode.get("items");
@@ -381,19 +383,19 @@ public class IcebergChangeEvent {
               }
               else {
                 if (listItemType.equals("struct")) {
-                  List<Types.NestedField> subSchema = icebergSchema(items, fieldName, columnId+2);
-                  schemaColumns.add(Types.NestedField.optional(columnId,
+                  List<Types.NestedField> subSchema = icebergSchema(items, fieldName);
+                  schemaColumns.add(Types.NestedField.optional(this.currentColumnId,
                                                                fieldName,
-                                                               Types.ListType.ofOptional(columnId+1,
+                                                               Types.ListType.ofOptional(this.currentColumnId,
                                                                                          Types.StructType.of(subSchema)),
                                                                ""));
-                  columnId += subSchema.size() + 2;
+//                  this.currentColumnId += subSchema.size() + 2;
                 }
                 else {
               // primitive coercions are not supported for list types, pass '""' for fieldTypeName
                   Type.PrimitiveType item = icebergFieldType(listItemType, "");
                   schemaColumns.add(Types.NestedField.optional(
-                      columnId, fieldName, Types.ListType.ofOptional(++columnId, item), ""));
+                      this.currentColumnId, fieldName, Types.ListType.ofOptional(++this.currentColumnId, item), ""));
                 }
               }
             } else {
@@ -407,10 +409,10 @@ public class IcebergChangeEvent {
             // create it as struct, nested type
             // passing "" for NestedField `doc` attribute,
             // as `doc` annotated coercions are not supported for members of struct types
-            List<Types.NestedField> subSchema = icebergSchema(jsonSchemaFieldNode, fieldName, columnId);
-            schemaColumns.add(Types.NestedField.optional(columnId, fieldName,
+            List<Types.NestedField> subSchema = icebergSchema(jsonSchemaFieldNode, fieldName);
+            schemaColumns.add(Types.NestedField.optional(this.currentColumnId, fieldName,
                                                          Types.StructType.of(subSchema), ""));
-            columnId += subSchema.size();
+//            this.currentColumnId += subSchema.size();
             break;
           default: //primitive types
             if (fieldName.equals(partitionColumn)) {
@@ -421,16 +423,17 @@ public class IcebergChangeEvent {
             }
             // passing fieldTypeName for NestedField `doc` attribute,
             // annotation based value coercions can be made utilizing the NestedField `doc` initializer/method
-            schemaColumns.add(Types.NestedField.optional(columnId, fieldName,
+            schemaColumns.add(Types.NestedField.optional(this.currentColumnId, fieldName,
                                                          icebergFieldType(fieldType, fieldTypeName),
                                                          fieldTypeName));
             break;
         }
+        this.currentColumnId++;
       }
 
       if (addPartitionField) {
-        columnId++;
-        schemaColumns.add(Types.NestedField.optional(columnId, partitionColumn,
+        this.currentColumnId++;
+        schemaColumns.add(Types.NestedField.optional(this.currentColumnId, partitionColumn,
                                                      Types.TimestampType.withZone(), ""));
       }
       return schemaColumns;

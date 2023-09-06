@@ -58,7 +58,6 @@ class TestIcebergUtil {
         IcebergChangeEvent e = new IcebergChangeEvent("test",
                 MAPPER.readTree(serdeWithSchemaNestedStruct).get("payload"), null,
                 MAPPER.readTree(serdeWithSchemaNestedStruct).get("schema"), null, this.defaultConfiguration);
-        System.out.println("bruh");
         Schema schema = e.icebergSchema(defaultPartitionColumn);
         System.out.println(schema);
         assertTrue(schema.toString().contains("before: optional struct<2: id: optional int (), " +

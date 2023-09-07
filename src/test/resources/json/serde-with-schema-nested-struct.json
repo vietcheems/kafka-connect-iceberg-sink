@@ -55,6 +55,28 @@
                 "type": "string",
                 "optional": false,
                 "field": "email"
+              },
+              {
+                "type": "struct",
+                "fields": [
+                  {
+                    "type": "string",
+                    "optional": false,
+                    "field": "first_name"
+                  },
+                  {
+                    "type": "string",
+                    "optional": false,
+                    "field": "last_name"
+                  },
+                  {
+                    "type": "string",
+                    "optional": false,
+                    "field": "email"
+                  }
+                ],
+                "optional": true,
+                "field": "info"
               }
             ],
             "optional": true,
@@ -168,7 +190,12 @@
       "info": {
         "first_name": "Anne",
         "last_name": "Kretchmar",
-        "email": "annek@noanswer.org"
+        "email": "annek@noanswer.org",
+        "info": {
+          "first_name": "Anne",
+          "last_name": "Kretchmar",
+          "email": "annek@noanswer.org"
+        }
       }
     },
     "source": {

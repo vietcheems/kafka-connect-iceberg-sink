@@ -19,9 +19,11 @@ import org.apache.iceberg.catalog.TableIdentifier;
 import org.apache.iceberg.data.GenericAppenderFactory;
 import org.apache.iceberg.exceptions.NoSuchTableException;
 import org.apache.iceberg.relocated.com.google.common.primitives.Ints;
+import org.apache.iceberg.types.Types.NestedField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -133,4 +135,18 @@ public class IcebergUtil {
 
     return sb.toString();
   }
+
+    public static int getFieldCount(List<NestedField> nestedFields) {
+        int num = 0;
+        for (NestedField field : nestedFields) {
+            if (field.type().isPrimitiveType()) {
+                num++;
+            }
+            else if (field.type().isStructType()) {
+                List<NestedField> subFields = field.type().asStructType().fields();
+                num += getFieldCount(subFields) + 1;
+            }
+        }
+        return num;
+    }
 }

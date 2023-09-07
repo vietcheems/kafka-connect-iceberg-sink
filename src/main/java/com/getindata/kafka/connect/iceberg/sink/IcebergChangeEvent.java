@@ -410,7 +410,8 @@ public class IcebergChangeEvent {
             List<Types.NestedField> subSchema = icebergSchema(jsonSchemaFieldNode, fieldName, columnId);
             schemaColumns.add(Types.NestedField.optional(columnId, fieldName,
                                                          Types.StructType.of(subSchema), ""));
-            columnId += subSchema.size();
+//            columnId += subSchema.size();
+            columnId += IcebergUtil.getFieldCount(subSchema);
             break;
           default: //primitive types
             if (fieldName.equals(partitionColumn)) {

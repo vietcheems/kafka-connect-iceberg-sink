@@ -41,6 +41,7 @@ class TestIcebergUtil {
     private static final String defaultPartitionTimestamp = "__source_ts_ms";
     private static final String defaultPartitionColumn = "__source_ts";
 
+    final String serdeComplex = Testing.Files.readResourceAsString("json/serde-with-schema-complex.json");
     final String serdeWithSchemaNestedStruct = Testing.Files.readResourceAsString("json/serde-with-schema-nested-struct.json");
     final String serdeWithSchema = Testing.Files.readResourceAsString("json/serde-with-schema.json");
     final String unwrapWithSchema = Testing.Files.readResourceAsString("json/unwrap-with-schema.json");
@@ -52,13 +53,21 @@ class TestIcebergUtil {
     final String customPartitionColumn = Testing.Files.readResourceAsString("json/custom-partition-column.json");
 
     private final IcebergSinkConfiguration defaultConfiguration = new IcebergSinkConfiguration(new HashMap());
-
+    @Test
+    public void testComplexJsonRecord() throws JsonProcessingException {
+        IcebergChangeEvent e = new IcebergChangeEvent("test",
+                MAPPER.readTree(serdeComplex).get("payload"), null,
+                MAPPER.readTree(serdeComplex).get("schema"), null, this.defaultConfiguration);
+        Schema schema = e.icebergSchema(defaultPartitionColumn);
+        System.out.println(schema);
+        assertTrue(schema.toString().contains("before: optional struct<2: id: optional int (), " +
+                "3: first_name: optional string (), 4:"));
+    }
     @Test
     public void testNestedStructJsonRecord() throws JsonProcessingException {
         IcebergChangeEvent e = new IcebergChangeEvent("test",
                 MAPPER.readTree(serdeWithSchemaNestedStruct).get("payload"), null,
                 MAPPER.readTree(serdeWithSchemaNestedStruct).get("schema"), null, this.defaultConfiguration);
-        System.out.println("bruh");
         Schema schema = e.icebergSchema(defaultPartitionColumn);
         System.out.println(schema);
         assertTrue(schema.toString().contains("before: optional struct<2: id: optional int (), " +
@@ -92,6 +101,7 @@ class TestIcebergUtil {
                 MAPPER.readTree(unwrapWithArraySchema).get("payload"), null,
                 MAPPER.readTree(unwrapWithArraySchema).get("schema"), null, this.defaultConfiguration);
         Schema schema = e.icebergSchema(defaultPartitionColumn);
+        System.out.println(schema);
         assertTrue(schema.asStruct().toString().contains("struct<1: name: optional string (), " +
                 "2: pay_by_quarter: optional list<int> (), 4: schedule: optional list<string> (), 6:"));
         System.out.println(schema.findField("pay_by_quarter").type().asListType().elementType());

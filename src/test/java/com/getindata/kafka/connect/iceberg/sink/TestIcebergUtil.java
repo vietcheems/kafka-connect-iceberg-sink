@@ -53,6 +53,7 @@ class TestIcebergUtil {
     final String customPartitionColumn = Testing.Files.readResourceAsString("json/custom-partition-column.json");
 
     private final IcebergSinkConfiguration defaultConfiguration = new IcebergSinkConfiguration(new HashMap());
+
     @Test
     public void testComplexJsonRecord() throws JsonProcessingException {
         IcebergChangeEvent e = new IcebergChangeEvent("test",
@@ -60,9 +61,10 @@ class TestIcebergUtil {
                 MAPPER.readTree(serdeComplex).get("schema"), null, this.defaultConfiguration);
         Schema schema = e.icebergSchema(defaultPartitionColumn);
         System.out.println(schema);
-        assertTrue(schema.toString().contains("before: optional struct<2: id: optional int (), " +
-                "3: first_name: optional string (), 4:"));
+        assertTrue(schema.toString().contains("3: data: optional struct<4: events: optional list<struct<6: key: optional string (), 7: count: optional int (), 8: segmentation: optional struct<9: type: optional string (), 10: x: optional int (), 11: y: optional int ()> ()>> (), 12: app_key: optional string (), 13: device_id: optional string ()> ()\n" +
+                "  14: __source_ts: optional timestamptz ()"));
     }
+
     @Test
     public void testNestedStructJsonRecord() throws JsonProcessingException {
         IcebergChangeEvent e = new IcebergChangeEvent("test",
@@ -73,6 +75,7 @@ class TestIcebergUtil {
         assertTrue(schema.toString().contains("before: optional struct<2: id: optional int (), " +
                 "3: first_name: optional string (), 4:"));
     }
+
     @Test
     public void testNestedJsonRecord() throws JsonProcessingException {
         IcebergChangeEvent e = new IcebergChangeEvent("test",
@@ -223,7 +226,7 @@ class TestIcebergUtil {
 
     @Test
     public void listStructSchemaHandling()
-      throws JsonProcessingException {
+            throws JsonProcessingException {
         IcebergChangeEvent e = new IcebergChangeEvent("test",
                 MAPPER.readTree(debeziumMetadataSchema).get("payload"), null,
                 MAPPER.readTree(debeziumMetadataSchema).get("schema"), null,
@@ -255,7 +258,7 @@ class TestIcebergUtil {
 
     @Test
     public void coerceDebeziumTemporalTypesDefaultBehavior()
-      throws JsonProcessingException {
+            throws JsonProcessingException {
         IcebergChangeEvent event = new IcebergChangeEvent(
                 "test",
                 MAPPER.readTree(debeziumTimeCoercionSchema).get("payload"), null,
@@ -268,7 +271,7 @@ class TestIcebergUtil {
 
     @Test
     public void coerceDebeziumTemporalTypesDisabledBehavior(@TempDir Path localWarehouseDir)
-      throws JsonProcessingException {
+            throws JsonProcessingException {
         IcebergSinkConfiguration config = TestConfig.builder()
                 .withLocalCatalog(localWarehouseDir)
                 .withCustomProperty("rich-temporal-types", "false")
@@ -285,7 +288,7 @@ class TestIcebergUtil {
 
     @Test
     public void coerceDebeziumTemporalTypesEnabledBehavior(@TempDir Path localWarehouseDir)
-      throws JsonProcessingException {
+            throws JsonProcessingException {
         IcebergSinkConfiguration configuration = TestConfig.builder()
                 .withLocalCatalog(localWarehouseDir)
                 .withCustomProperty("rich-temporal-types", "true")

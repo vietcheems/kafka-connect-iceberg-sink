@@ -142,8 +142,8 @@ public class IcebergUtil {
             if (field.type().isPrimitiveType()) {
                 num++;
             }
-            else if (field.type().isStructType()) {
-                List<NestedField> subFields = field.type().asStructType().fields();
+            else if (field.type().isNestedType()) {
+                List<NestedField> subFields = field.type().asNestedType().fields();
                 num += getFieldCount(subFields) + 1;
             }
         }

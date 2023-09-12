@@ -381,13 +381,13 @@ public class IcebergChangeEvent {
               }
               else {
                 if (listItemType.equals("struct")) {
-                  List<Types.NestedField> subSchema = icebergSchema(items, fieldName, columnId+2);
+                  List<Types.NestedField> subSchema = icebergSchema(items, fieldName, columnId+1);
                   schemaColumns.add(Types.NestedField.optional(columnId,
                                                                fieldName,
                                                                Types.ListType.ofOptional(columnId+1,
                                                                                          Types.StructType.of(subSchema)),
                                                                ""));
-                  columnId += subSchema.size() + 2;
+                  columnId += IcebergUtil.getFieldCount(subSchema) + 1;
                 }
                 else {
               // primitive coercions are not supported for list types, pass '""' for fieldTypeName

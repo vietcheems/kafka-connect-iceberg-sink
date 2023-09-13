@@ -117,16 +117,17 @@ class TestIcebergUtil {
 
     @Test
     public void testNestedArray2JsonRecord() throws JsonProcessingException {
-        assertThrows(RuntimeException.class, () -> {
-            IcebergChangeEvent e = new IcebergChangeEvent("test",
-                    MAPPER.readTree(unwrapWithArraySchema2).get("payload"), null,
-                    MAPPER.readTree(unwrapWithArraySchema2).get("schema"), null, this.defaultConfiguration);
-            Schema schema = e.icebergSchema(defaultPartitionColumn);
-            System.out.println(schema.asStruct());
-            System.out.println(schema);
-            System.out.println(schema.findField("tableChanges"));
-            System.out.println(schema.findField("tableChanges").type().asListType().elementType());
-        });
+        IcebergChangeEvent e = new IcebergChangeEvent("test",
+                MAPPER.readTree(unwrapWithArraySchema2).get("payload"), null,
+                MAPPER.readTree(unwrapWithArraySchema2).get("schema"), null, this.defaultConfiguration);
+        Schema schema = e.icebergSchema(defaultPartitionColumn);
+        System.out.println(schema.asStruct());
+        System.out.println(schema);
+        assertTrue(schema.asStruct().toString().contains("20: tableChanges: optional list<struct<22: type: optional string"));
+        System.out.println(schema.findField("tableChanges"));
+        System.out.println(schema.findField("tableChanges").type().asListType().elementType());
+        //GenericRecord record = IcebergUtil.getIcebergRecord(schema.asStruct(), jsonPayload);
+        //System.out.println(record);
     }
 
     @Test

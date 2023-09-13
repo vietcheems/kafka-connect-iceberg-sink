@@ -1,0 +1,140 @@
+{
+  "schema": {
+    "type": "struct",
+    "fields": [
+      {
+        "type": "string",
+        "optional": true,
+        "field": "collection"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "query"
+      },
+      {
+        "type": "struct",
+        "fields": [
+          {
+            "type": "array",
+            "items": {
+              "type": "struct",
+              "fields": [
+                {
+                  "type": "string",
+                  "optional": true,
+                  "field": "key"
+                },
+                {
+                  "type": "int32",
+                  "optional": true,
+                  "field": "count"
+                },
+                {
+                  "type": "struct",
+                  "optional": true,
+                  "field": "segmentation",
+                  "fields": [
+                    {
+                      "type": "string",
+                      "optional": true,
+                      "field": "type"
+                    },
+                    {
+                      "type": "int32",
+                      "optional": true,
+                      "field": "x"
+                    },
+                    {
+                      "type": "int32",
+                      "optional": true,
+                      "field": "y"
+                    }
+                  ]
+                }
+              ],
+              "optional": true
+            },
+            "optional": true,
+            "field": "events"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "app_key"
+          },
+          {
+            "type": "string",
+            "optional": false,
+            "field": "device_id"
+          }
+        ],
+        "optional": true,
+        "field": "data"
+      }
+    ]
+  },
+  "payload": {
+    "collection": "click_events62ea35fe235a31ea38e6aa78",
+    "query": "insert",
+    "data": {
+      "events": [
+        {
+          "key": "[CLY]_action",
+          "count": 1,
+          "segmentation": {
+            "type": "mouseArea",
+            "x": 889,
+            "y": 636,
+            "width": 1349,
+            "height": 2821,
+            "view": "/vi/vnface",
+            "parent": {
+              "x": 872.171875,
+              "y": 599.578125,
+              "width": 330,
+              "height": 49
+            },
+            "domain": "console-vnface.vnpt.vn"
+          },
+          "timestamp": 1693454374130,
+          "hour": 10,
+          "dow": 4
+        },
+        {
+          "key": "[CLY]_action",
+          "count": 1,
+          "segmentation": {
+            "type": "mouseArea",
+            "x": 218,
+            "y": 3,
+            "width": 1349,
+            "height": 2821,
+            "view": "/vi/vnface",
+            "parent": {
+              "x": 0,
+              "y": 0,
+              "width": 1349,
+              "height": 60
+            },
+            "domain": "console-vnface.vnpt.vn"
+          },
+          "timestamp": 1693454374131,
+          "hour": 10,
+          "dow": 4
+        }
+      ],
+      "app_key": "5fa32bd8282b2fcdc247b68241faebffcd4ece04",
+      "device_id": "5f52a973-1bd2-42d7-9208-8b513b5a364d",
+      "sdk_name": "javascript_native_web",
+      "sdk_version": "22.06.0",
+      "t": 1,
+      "timestamp": 1693454374132,
+      "hour": 10,
+      "dow": 4,
+      "raw_html": null,
+      "screen_size_type": "Desktop1366",
+      "_id": "64f01026bf4d28c5942b0ceb"
+    }
+  }
+}
